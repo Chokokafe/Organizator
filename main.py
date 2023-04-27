@@ -1,20 +1,23 @@
 # Organizator, créé par Chokokafé le 25/04/2023
+#This program allows creation of projects by breaking them down in simple tasks, and organization of them.
+
+# IMPORTS
 
 from tkinter import*
 from customtkinter import*
 from PIL import Image
 from drawgraph import*
 
+#IMAGE IMPORTS
 plus_image = CTkImage(light_image=Image.open("plus-icon.png"),dark_image=Image.open("plus-icon.png"),size=(60,60))
 
-save = open("save.txt","a+")
-save.seek(0)
-if save.readlines() == []:
-    save.write("Nothing here!")
-    save.close()
 
+	
+#CLASSES
 class App(CTk):
+	'''The app itself.'''
     def __init__(self):
+		'''The init function that sets appearance mode, color theme, size and name of the window, and sets the "location" variable to "start".'''
         super().__init__()
         set_appearance_mode("dark")
         set_default_color_theme("blue")
@@ -23,11 +26,13 @@ class App(CTk):
         self.location = "start"
 
     def forget_all(self):
+		'''Delete all elements from a window, depending the "location" variable.'''
         if self.location=="start":
             self.startframe.destroy()
             self.labelframe.destroy()
             
     def window_config(self):
+		'''Sets all the config parameters depending the "location" variable (particularly rows and columns for the tkinter grid placement).'''
         if self.location == "start":
             self.rowconfigure(1,weight=5,minsize=100)
             self.columnconfigure(1,weight=1,minsize=1)
@@ -40,6 +45,12 @@ class App(CTk):
             self.columnconfigure(3,weight=0)
             
     def create_new_project(self,name):
+		"""
+		Creates a new project and saves it in the save file created at the start of the main function.
+		
+		Parameters : 
+			name(str) : the name of the project
+		"""
         name_exists = 0
         save = open("save.txt", "r+")
         for i in save.readlines():
@@ -57,6 +68,16 @@ class App(CTk):
             save.write("name : {}\n".format(name))
             
     def create_new_task(self,project,name,follow,subtask,opt):
+		"""
+		Creates a new task and saves it in the save file created at the start of the main function.
+	
+		Parameters :
+			project(str) : the name of the project which the task belongs to
+			name(str) : the name of the task itself
+			follow(str) : if the task is a substask of another, the name of the task above
+			subtask(int) : 1 if the task is a substask of another, 0 else
+			opt(int) : 1 if the task is optional, 0 else
+		"""
         self.update()
         if follow=='':
             follow="aucun"
@@ -82,6 +103,7 @@ class App(CTk):
         self.followcombo.configure(values=self.currenttaskList)
         
     def GUI_start(self):
+		'''Initializes the startup screen window.'''
         self.window_config()
         self.startframe = CTkFrame(self,fg_color="transparent")
         self.labelframe = CTkFrame(self,fg_color="transparent")
@@ -101,6 +123,7 @@ class App(CTk):
         self.labelframe.grid(row=1,column=2)
         
     def GUI_NewProject(self):
+		'''Initializes the "New Project" section.'''
         follow=StringVar()
         subtask=IntVar()
         opt=IntVar()
@@ -143,9 +166,13 @@ class App(CTk):
         # ProjectFrame : Projection graphique du projet
         
         self.projectframe = CTkFrame(self,fg_color="transparent")
-        
-        
-        
+
+save = open("save.txt","a+")
+save.seek(0)
+if save.readlines() == []:
+    save.write("Nothing here!")
+    save.close()      
+                
 app = App()
 app.GUI_start()
 app.mainloop()
