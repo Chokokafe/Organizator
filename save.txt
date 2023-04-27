@@ -1,0 +1,41 @@
+name : test
++Hello
+aucun
+0
+1
++fghf
+aucun
+0
+1
++dfg
+aucun
+0
+1
++dfgdgd
+aucun
+0
+1
+name : testy
++setst
+aucun
+0
+1
+name : sfzqert
++dhrthdr
+aucun
+0
+0
++dhrthdrsertge
+aucun
+0
+0
+name : sfsfdsf
+name : sefddgdsqg
++zerzzrs
+aucun
+0
+1
++zerzzrsert
+zerzzrs
+1
+1
