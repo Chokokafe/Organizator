@@ -1,38 +1,40 @@
 # Organizator, créé par Chokokafé le 25/04/2023
 #This program allows creation of projects by breaking them down in simple tasks, and organization of them.
-
+# -*- coding: utf-8 -*-
 # IMPORTS
 
 from tkinter import*
 from customtkinter import*
-from PIL import Image
+import PIL.Image
 from drawgraph import*
 
 #IMAGE IMPORTS
-plus_image = CTkImage(light_image=Image.open("plus-icon.png"),dark_image=Image.open("plus-icon.png"),size=(60,60))
-
-
-	
+plus_image = CTkImage(light_image=PIL.Image.open("plus-icon.png"),dark_image=PIL.Image.open("plus-icon.png"),size=(60,60))
+    
 #CLASSES
 class App(CTk):
-	'''The app itself.'''
+    '''The app itself.'''
     def __init__(self):
-		'''The init function that sets appearance mode, color theme, size and name of the window, and sets the "location" variable to "start".'''
+        '''The init function that sets appearance mode, color theme, size and name of the window, and sets the "location" variable to "start".'''
         super().__init__()
         set_appearance_mode("dark")
         set_default_color_theme("blue")
-        self.geometry("1000x600")
+        self.geometry("1000x800")
         self.title("Organizator")
-        self.location = "start"
 
     def forget_all(self):
-		'''Delete all elements from a window, depending the "location" variable.'''
-        if self.location=="start":
-            self.startframe.destroy()
-            self.labelframe.destroy()
+        '''Delete all elements from a window, depending the "location" variable.'''
+        if hasattr(self, 'location'):
+            if self.location=="start":
+                self.startframe.destroy()
+                self.labelframe.destroy()
+            if self.location == "new_project":
+                self.nameframe.destroy()
+                self.taskframe.destroy()
+                self.projectframe.destroy()
             
     def window_config(self):
-		'''Sets all the config parameters depending the "location" variable (particularly rows and columns for the tkinter grid placement).'''
+        '''Sets all the config parameters depending the "location" variable (particularly rows and columns for the tkinter grid placement).'''
         if self.location == "start":
             self.rowconfigure(1,weight=5,minsize=100)
             self.columnconfigure(1,weight=1,minsize=1)
@@ -43,14 +45,20 @@ class App(CTk):
             self.columnconfigure(1,weight=1)
             self.columnconfigure(2,weight=1)
             self.columnconfigure(3,weight=0)
+        if self.location == "view_project":
+            self.rowconfigure(1,weight=1,minsize=1)
+            self.rowconfigure(2,weight=0,minsize=1)
+            self.columnconfigure(1,weight=1)
+            self.columnconfigure(2,weight=0)
+            self.columnconfigure(3,weight=0)
             
     def create_new_project(self,name):
-		"""
-		Creates a new project and saves it in the save file created at the start of the main function.
-		
-		Parameters : 
-			name(str) : the name of the project
-		"""
+        """
+        Creates a new project and saves it in the save file created at the start of the main function.
+        
+        Parameters : 
+            name(str) : the name of the project
+        """
         name_exists = 0
         save = open("save.txt", "r+")
         for i in save.readlines():
@@ -68,16 +76,16 @@ class App(CTk):
             save.write("name : {}\n".format(name))
             
     def create_new_task(self,project,name,follow,subtask,opt):
-		"""
-		Creates a new task and saves it in the save file created at the start of the main function.
-	
-		Parameters :
-			project(str) : the name of the project which the task belongs to
-			name(str) : the name of the task itself
-			follow(str) : if the task is a substask of another, the name of the task above
-			subtask(int) : 1 if the task is a substask of another, 0 else
-			opt(int) : 1 if the task is optional, 0 else
-		"""
+        """
+        Creates a new task and saves it in the save file created at the start of the main function.
+    
+        Parameters :
+            project(str) : the name of the project which the task belongs to
+            name(str) : the name of the task itself
+            follow(str) : if the task is a substask of another, the name of the task above
+            subtask(int) : 1 if the task is a substask of another, 0 else
+            opt(int) : 1 if the task is optional, 0 else
+        """
         self.update()
         if follow=='':
             follow="aucun"
@@ -101,16 +109,22 @@ class App(CTk):
             save.close()
         self.currenttaskList.append(name)
         self.followcombo.configure(values=self.currenttaskList)
+    def project_save_and_back_to_menu(self):
+        with open("save.txt","a") as f:
+            f.write("end_of_project\n")
+        self.GUI_start()
         
     def GUI_start(self):
-		'''Initializes the startup screen window.'''
+        '''Initializes the startup screen window.'''
+        self.forget_all()
+        self.location = "start"
         self.window_config()
         self.startframe = CTkFrame(self,fg_color="transparent")
         self.labelframe = CTkFrame(self,fg_color="transparent")
         label = CTkLabel(self.labelframe,text = "Organizator",font=("Verdana",30))
         new1 = CTkButton(self.startframe,text = "New Project",width=150,height=60,corner_radius=30, command=lambda:self.GUI_NewProject())
         new2 = CTkButton(self.startframe,text = "Day Setup",width=150,height=60,corner_radius=30)
-        view1 = CTkButton(self.startframe,text = "Graph View",width=150,height=60,corner_radius=30)
+        view1 = CTkButton(self.startframe,text = "Graph View",width=150,height=60,corner_radius=30, command=lambda:self.GUI_ViewProject())
         view2 = CTkButton(self.startframe,text = "List View",width=150,height=60,corner_radius=30)
         view3 = CTkButton(self.startframe,text = "Projects",width=150,height=60,corner_radius=30)
         label.pack()
@@ -123,7 +137,7 @@ class App(CTk):
         self.labelframe.grid(row=1,column=2)
         
     def GUI_NewProject(self):
-		'''Initializes the "New Project" section.'''
+        '''Initializes the "New Project" section.'''
         follow=StringVar()
         subtask=IntVar()
         opt=IntVar()
@@ -166,7 +180,34 @@ class App(CTk):
         # ProjectFrame : Projection graphique du projet
         
         self.projectframe = CTkFrame(self,fg_color="transparent")
-
+        backbutton = CTkButton(self.projectframe,text = "Save and Go Back",command = lambda:self.project_save_and_back_to_menu())
+        backbutton.pack()
+        self.projectframe.grid(row = 1,column=2)
+    
+    def GUI_ViewProject(self):
+        self.forget_all()
+        self.location = "view_project"
+        self.window_config()
+        projects = []
+        with open("save.txt") as f:
+            for i in f.readlines():
+                if "name :" in i:
+                    j = i.replace("name : ","")
+                    j = j.replace("\n","")
+                    projects.append(j)
+        view = StringVar(value = projects[0])
+        self.viewframe = CTkFrame(self,fg_color = "transparent")
+        viewcanvas = CTkCanvas(self.viewframe,width=600,height=600)
+        viewcombo = CTkComboBox(self.viewframe, values = projects,variable=view)
+        viewbutton = CTkButton(self.viewframe, text = "Render the graph", command = lambda:draw_graph("save.txt", view.get(),viewcanvas))
+        viewcombo.pack()
+        viewcanvas.pack()
+        viewbutton.pack()
+        self.viewframe.pack()
+        
+        
+                                
+        
 save = open("save.txt","a+")
 save.seek(0)
 if save.readlines() == []:
